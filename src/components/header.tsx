@@ -1,4 +1,4 @@
-import { ClipboardList, Home, Pizza, Star, UtensilsCrossed } from 'lucide-react'
+import { Home, Pizza, UtensilsCrossed } from 'lucide-react'
 
 import { AccountMenu } from './account-menu'
 import { NavLink } from './nav-link'

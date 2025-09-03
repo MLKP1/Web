@@ -43,8 +43,6 @@ export function OrderTableRow({ order }: OrderTableRowProps) {
       queryKey: ['orders'],
     })
 
-    console.log(ordersListingCache)
-
     ordersListingCache.forEach(([cacheKey, cached]) => {
       if (!cached) {
         return

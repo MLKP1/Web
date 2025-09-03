@@ -14,7 +14,6 @@ export async function getDailyReceiptInPeriod({
   from,
   to,
 }: GetDailyReceiptInPeriodQuery) {
-  console.log('$$$ Passei aqui')
   const response = await api.get<GetDailyReceiptInPeriodResponse>(
     '/metrics/daily-receipt-in-period',
     {

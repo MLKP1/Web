@@ -7,12 +7,13 @@ import { Dashboard } from './pages/app/dashboard'
 import { Orders } from './pages/app/orders/orders'
 import { SignIn } from './pages/auth/sign-in'
 import { SignUp } from './pages/auth/sign-up'
+import { ErrorBoundary } from './components/error-boundary'
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
-    errorElement: <NotFound />,
+    errorElement: <ErrorBoundary />,
     children: [
       {
         path: '/',
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <AuthLayout />,
+    errorElement: <ErrorBoundary />,
     children: [
       {
         path: '/sign-in',
@@ -37,5 +39,9 @@ export const router = createBrowserRouter([
         element: <SignUp />,
       },
     ],
+  },
+  {
+    path: '*',
+    element: <NotFound />,
   },
 ])

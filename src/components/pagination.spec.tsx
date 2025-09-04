@@ -5,7 +5,7 @@ import { Mock } from 'vitest'
 import { Pagination } from './pagination'
 
 let user: UserEvent
-let onPageChangeCallback: Mock<[number], void>
+let onPageChangeCallback: Mock<(pageIndex: number) => void>
 
 describe('Pagination', () => {
   beforeEach(() => {

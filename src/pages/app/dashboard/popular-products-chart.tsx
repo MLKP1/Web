@@ -7,8 +7,12 @@ import {
   PieChart,
   ResponsiveContainer,
   Tooltip,
-  TooltipProps,
+  TooltipContentProps,
 } from 'recharts'
+import {
+  NameType,
+  ValueType,
+} from 'recharts/types/component/DefaultTooltipContent'
 import colors from 'tailwindcss/colors'
 
 import { getPopularProducts } from '@/api/get-popular-products'
@@ -20,14 +24,19 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-function CustomTooltip({ active, payload }: TooltipProps<number, number>) {
+function CustomTooltip({
+  active,
+  payload,
+}: TooltipContentProps<ValueType, NameType>) {
   if (active && payload && payload.length) {
+    const data: { name: string; value: number } = payload[0]
+
     return (
       <div className="flex flex-col gap-2 rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
-        <span className="text-base font-semibold">{payload[0].name}</span>
+        <span className="text-base font-semibold">{data.name}</span>
         <div className="flex flex-col gap-1">
           <span className="">
-            <span className="font-semibold">Vendas:</span> {payload[0].value}
+            <span className="font-semibold">Vendas:</span> {data.value}
           </span>
         </div>
       </div>
@@ -90,8 +99,8 @@ export function PopularProductsChart() {
                 }) => {
                   const RADIAN = Math.PI / 180
                   const radius = 12 + innerRadius + (outerRadius - innerRadius)
-                  const x = cx + radius * Math.cos(-midAngle * RADIAN)
-                  const y = cy + radius * Math.sin(-midAngle * RADIAN)
+                  const x = cx + radius * Math.cos(-midAngle! * RADIAN)
+                  const y = cy + radius * Math.sin(-midAngle! * RADIAN)
 
                   return (
                     <text
@@ -101,7 +110,7 @@ export function PopularProductsChart() {
                       textAnchor={x > cx ? 'start' : 'end'}
                       dominantBaseline="central"
                     >
-                      {popularProducts[index].product
+                      {popularProducts[index!].product
                         .substring(0, 12)
                         .concat('...')}{' '}
                       ({value})
@@ -121,7 +130,7 @@ export function PopularProductsChart() {
                 })}
               </Pie>
 
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={CustomTooltip} />
             </PieChart>
           </ResponsiveContainer>
         ) : (

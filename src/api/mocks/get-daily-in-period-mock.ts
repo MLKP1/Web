@@ -1,0 +1,17 @@
+import { http, HttpResponse } from 'msw'
+
+import {GetDailyReceiptInPeriodResponse} from '../get-daily-receipt-in-period'
+
+export const getDailyReceiptInPeriodMock = http.get<
+  never,
+  never,
+  GetDailyReceiptInPeriodResponse
+>('/metrics/daily-receipt-in-period', async () => {
+  return HttpResponse.json([
+    { date: '01/01', receipt: 120 },
+    { date: '02/01', receipt: 145 },
+    { date: '03/01', receipt: 210 },
+    { date: '04/01', receipt: 180 },
+    { date: '05/01', receipt: 190 },
+  ])
+})

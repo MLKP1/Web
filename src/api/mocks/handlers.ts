@@ -2,6 +2,7 @@ import { approveOrderMock } from './approve-order-mock'
 import { cancelOrderMock } from './cancel-order-mock'
 import { deliverOrderMock } from './deliver-order-mock'
 import { dispatchOrderMock } from './dispatch-order-mock'
+import { getDailyReceiptInPeriodMock } from './get-daily-in-period-mock.ts'
 import { getDayOrdersAmountMock } from './get-day-orders-amount-mock'
 import { getManagedRestaurantMock } from './get-managed-restaurant-mock'
 import { getMonthCanceledOrdersAmountMock } from './get-month-canceled-orders-amount-mock'
@@ -21,6 +22,7 @@ export const handlers = [
   getProfileMock,
   getManagedRestaurantMock,
   updateProfileMock,
+  getDailyReceiptInPeriodMock,
   getDayOrdersAmountMock,
   getMonthCanceledOrdersAmountMock,
   getMonthOrdersAmountMock,

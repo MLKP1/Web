@@ -9,10 +9,14 @@ import {
   LineChart,
   ResponsiveContainer,
   Tooltip,
-  TooltipProps,
+  TooltipContentProps,
   XAxis,
   YAxis,
 } from 'recharts'
+import {
+  NameType,
+  ValueType,
+} from 'recharts/types/component/DefaultTooltipContent'
 import { violet } from 'tailwindcss/colors'
 
 import { getDailyReceiptInPeriod } from '@/api/get-daily-receipt-in-period'
@@ -40,14 +44,16 @@ function CustomTooltip({
   active,
   payload,
   label,
-}: TooltipProps<number, number>) {
+}: TooltipContentProps<ValueType, NameType>) {
   if (active && payload && payload.length) {
+    const data: { value?: number } = payload[0]
+
     return (
       <div className="flex gap-1 rounded-l border bg-card p-2 text-sm text-card-foreground shadow-sm">
         <span className="font-semibold">{label}</span>
         <span>-</span>
         <span>
-          {payload[0].value?.toLocaleString('pt-BR', {
+          {data.value?.toLocaleString('pt-BR', {
             style: 'currency',
             currency: 'BRL',
           })}
@@ -70,7 +76,7 @@ export function ReceiptChart() {
     isFetching: isLoadingDailyReceiptInPeriod,
     error: dailyReceiptError,
   } = useQuery({
-    retry: false,
+    retry: true,
     queryKey: ['metrics', 'daily-receipt-in-period', period],
     queryFn: () =>
       getDailyReceiptInPeriod({
@@ -139,7 +145,7 @@ export function ReceiptChart() {
                     stroke={violet['500']}
                   />
 
-                  <Tooltip cursor={false} content={<CustomTooltip />} />
+                  <Tooltip cursor={false} content={CustomTooltip} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -162,7 +168,7 @@ export function ReceiptChart() {
           <div className="flex h-[240px] w-full flex-col items-center justify-center gap-0.5">
             <span className="flex items-center gap-2 text-sm text-red-500 dark:text-red-400">
               <XCircle className="h-4 w-4" />
-              {/* {dailyReceiptError.message} É PRECISO TRATAR MELHOR OS ERROS */}
+              {/* TODO: {dailyReceiptError.message} É PRECISO TRATAR MELHOR OS ERROS */}
               Erro ao obter dados do período.
             </span>
             <Button

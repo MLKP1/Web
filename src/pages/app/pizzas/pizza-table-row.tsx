@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowRight, Loader2, Search, Trash } from 'lucide-react'
+import { ArrowRight, Loader2, Search, Pencil, Trash } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -15,6 +15,7 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { TableCell, TableRow } from '@/components/ui/table'
 
 import { PizzaDetails } from './pizza-details'
+import { PizzaEdit } from './pizza-edit'
 
 export interface PizzaTableRowProps {
   pizza: {
@@ -32,6 +33,7 @@ export interface PizzaTableRowProps {
 
 export function PizzaTableRow({ pizza }: PizzaTableRowProps) {
   const [isPizzaDetailsOpen, setIsPizzaDetailsOpen] = useState(false)
+  const [isPizzaEditOpen, setIsPizzaEditOpen] = useState(false)
   const queryClient = useQueryClient()
 
   function updatePizzaActiveOnCache(pizzaId: string, active: boolean) {
@@ -104,6 +106,31 @@ export function PizzaTableRow({ pizza }: PizzaTableRowProps) {
         removePizzaOnCache(pizzaId)
       }
     })
+
+  function editPizzaOnCache(updatedPizza: PizzaTableRowProps['pizza']) {
+    const pizzasListingCache = queryClient.getQueriesData<GetPizzasResponse>({
+      queryKey: ['pizzas'],
+    })
+
+    pizzasListingCache.forEach(([cacheKey, cached]) => {
+      if (!cached) {
+        return
+      }
+
+      queryClient.setQueryData<GetPizzasResponse>(cacheKey, {
+        ...cached,
+        pizzas: cached.pizzas.map((pizza) => {
+          if (pizza.pizzaId !== updatedPizza.pizzaId) {
+            return pizza
+          }
+
+          return updatedPizza
+        })
+      })
+    })
+
+    toast.success('Pizza editada com sucesso!')
+  }
 
   return (
     <TableRow>
@@ -180,6 +207,27 @@ export function PizzaTableRow({ pizza }: PizzaTableRowProps) {
           </Button>
         )
       }
+      </TableCell>
+
+      <TableCell>
+        <Dialog onOpenChange={setIsPizzaEditOpen} open={isPizzaEditOpen}>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="xs"
+            >
+              <Pencil className="h-3 w-3" />
+              <span className="sr-only">Editar pizza</span>
+            </Button>
+          </DialogTrigger>
+
+          <PizzaEdit
+            onOpenChange={setIsPizzaEditOpen}
+            open={isPizzaEditOpen}
+            pizza={pizza}
+            onPizzaUpdated={(updatedPizza) => editPizzaOnCache(updatedPizza)}
+          />
+        </Dialog>
       </TableCell>
 
       <TableCell>

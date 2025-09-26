@@ -1,4 +1,4 @@
-import { Search, Trash } from 'lucide-react'
+import { Pencil, Search, Trash } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -47,6 +47,13 @@ export function PizzasTableSkeleton() {
 
             <TableCell>
               <Skeleton className="h-4 w-[100px]" />
+            </TableCell>
+
+            <TableCell>
+              <Button variant="outline" size="xs" disabled>
+                <Pencil className="h-3 w-3" />
+                <span className="sr-only">Editar pizza</span>
+            </Button>
             </TableCell>
 
             <TableCell>

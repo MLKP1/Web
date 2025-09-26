@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { Loader2Icon } from 'lucide-react'
+import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useSearchParams } from 'react-router-dom'
+import { queryClient } from '@/lib/react-query'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Pagination } from '@/components/pagination'
@@ -13,12 +16,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Dialog, DialogTrigger } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 import { PizzaTableFilters } from './pizza-table-filters'
 import { PizzasTableSkeleton } from './pizzas-table-skeleton'
 import { PizzaTableRow } from './pizza-table-row'
+import { PizzaRegister } from './pizza-register'
 
-import { getPizzas } from '@/api/get-pizzas'
+import { getPizzas, GetPizzasResponse } from '@/api/get-pizzas'
 
 const activeMap: Record<string, boolean | undefined> = {
   'activated': true,
@@ -27,6 +33,7 @@ const activeMap: Record<string, boolean | undefined> = {
 }
 
 export function Pizzas() {
+  const [isPizzaRegisterOpen, setIsPizzaRegisterOpen] = useState(false)
   const [searchParams, setSearchParams] = useSearchParams()
 
   const pizzaId = searchParams.get('pizzaId')
@@ -65,16 +72,54 @@ export function Pizzas() {
     })
   }
 
+  function registerPizzaOnCache(newPizza: any) {
+      const pizzasListingCache = queryClient.getQueriesData<GetPizzasResponse>({
+        queryKey: ['pizzas'],
+      })
+
+      pizzasListingCache.forEach(([cacheKey, cached]) => {
+        if (!cached) {
+          return
+        }
+
+        queryClient.setQueryData<GetPizzasResponse>(cacheKey, {
+          ...cached,
+          pizzas: [newPizza, ...cached.pizzas],
+        })
+
+        toast.success('Pizza cadastrada com sucesso!')
+      })
+    }
+
   return (
     <>
       <Helmet title="Pizzas" />
       <div className="flex flex-col gap-4">
-        <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight">
-          Pizzas
-          {isFetchingPizzas && (
-            <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
-          )}
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight">
+            Pizzas
+            {isFetchingPizzas && (
+              <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
+            )}
+          </h1>
+          <Dialog onOpenChange={setIsPizzaRegisterOpen} open={isPizzaRegisterOpen}>
+            <DialogTrigger asChild>
+              <Button
+                type="button"
+                variant="secondary"
+                size="default"
+              >
+                Cadastrar
+              </Button>
+            </DialogTrigger>
+
+            <PizzaRegister
+              open={isPizzaRegisterOpen}
+              onOpenChange={setIsPizzaRegisterOpen}
+              onPizzaCreated={(newPizza) => registerPizzaOnCache(newPizza)}
+            />
+          </Dialog>
+        </div>
         <div className="space-y-2.5">
           <PizzaTableFilters />
           <div className="rounded-md border">
@@ -90,6 +135,7 @@ export function Pizzas() {
                   <TableHead className="w-[100px]">Status</TableHead>
                   <TableHead className="w-[100px]">Preço</TableHead>
                   <TableHead className="w-[132px]"></TableHead>
+                  <TableHead className="w-[64px]"></TableHead>
                   <TableHead className="w-[64px]"></TableHead>
                 </TableRow>
               </TableHeader>

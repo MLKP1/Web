@@ -4,7 +4,7 @@ export interface RegisterPizzaRequest {
   name: string
   description: string
   price: number
-  image: string
+  image: FileList
   size: 'MEDIUM' | 'LARGE' | 'FAMILY'
   type: 'SALTY' | 'SWEET'
   slug: string
@@ -21,16 +21,22 @@ export async function registerPizza({
   slug,
   active,
 }: RegisterPizzaRequest) {
-  const response = await api.post('/products/pizzas', {
-    name,
-    description,
-    price,
-    image,
-    size,
-    type,
-    slug,
-    active
-  })
+  const formData = new FormData();
+  formData.append('name', name);
+  formData.append('description', description);
+  formData.append('price', price.toString());
+  formData.append('size', size);
+  formData.append('type', type);
+  formData.append('slug', slug);
+  formData.append('active', active.toString());
+
+  if (image instanceof FileList && image.length > 0) {
+    formData.append('image', image[0]);
+  } else if (typeof image === 'string') {
+    formData.append('image', image);
+  }
+
+  const response = await api.post('/products/pizzas', formData);
 
   return response.data
 }

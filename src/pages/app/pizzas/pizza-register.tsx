@@ -27,6 +27,8 @@ import {
 import { toast } from 'sonner'
 import { registerPizza } from '@/api/register-pizza'
 
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
+
 const createPizzaFormSchema = z.object({
   name: z.string().min(3, { message: 'O nome deve ter pelo menos 3 caracteres' }),
   description: z.string().min(10, { message: 'A descrição deve ter pelo menos 10 caracteres' }),
@@ -37,7 +39,16 @@ const createPizzaFormSchema = z.object({
   type: z.enum(['SALTY', 'SWEET']),
   active: z.enum(['activated', 'disabled']),
   slug: z.string().optional(),
-  image: z.string().optional(),
+  image: z
+    .instanceof(FileList)
+    .refine(
+      (files) => !files || files.length === 0 || ACCEPTED_IMAGE_TYPES.includes(files[0]?.type),
+      { message: "Apenas formatos .jpg, .jpeg, .png e .webp são suportados." }
+    )
+    .refine(
+      (files) => !files || files.length === 0 || files[0]?.size <= 25 * 1024 * 1024,
+      { message: "A imagem deve ter no máximo 25MB." }
+    )
 })
 
 type CreatePizzaFormData = z.infer<typeof createPizzaFormSchema>
@@ -51,7 +62,7 @@ interface Pizza {
   price: number
   size: 'MEDIUM' | 'LARGE' | 'FAMILY'
   type: 'SALTY' | 'SWEET'
-  image: string
+  image: FileList
 }
 
 interface PizzaRegisterProps {
@@ -79,7 +90,7 @@ export function PizzaRegister({ open, onOpenChange, onPizzaCreated }: PizzaRegis
       type: 'SALTY',
       active: 'activated',
       slug: '',
-      image: '',
+      image: undefined,
     },
   })
 
@@ -89,7 +100,7 @@ export function PizzaRegister({ open, onOpenChange, onPizzaCreated }: PizzaRegis
         name: data.name,
         description: data.description,
         price: parseFloat(data.price) * 100,
-        image: data.image || '',
+        image: data.image,
         size: data.size,
         type: data.type,
         slug: data.slug || data.name.toLowerCase().replace(/ /g, '-'),
@@ -97,11 +108,11 @@ export function PizzaRegister({ open, onOpenChange, onPizzaCreated }: PizzaRegis
       })
 
       const newPizza: Pizza = {
-        pizzaId: response?.pizzaId || `temp-${Date.now()}`,
+        pizzaId: response.pizzaId,
         name: data.name,
         description: data.description,
         price: parseFloat(data.price) * 100,
-        image: data.image || '',
+        image: data.image,
         size: data.size,
         type: data.type,
         slug: data.slug || data.name.toLowerCase().replace(/ /g, '-'),
@@ -111,11 +122,8 @@ export function PizzaRegister({ open, onOpenChange, onPizzaCreated }: PizzaRegis
     return newPizza
     },
     onSuccess: (newPizza) => {
-      toast.success('Pizza cadastrada com sucesso!')
       reset()
       onOpenChange(false)
-
-      console.log(`newPizza ${newPizza}`)
 
       if (onPizzaCreated) {
         onPizzaCreated(newPizza)
@@ -262,11 +270,12 @@ export function PizzaRegister({ open, onOpenChange, onPizzaCreated }: PizzaRegis
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="image">URL da Imagem (opcional)</Label>
+            <Label htmlFor="image">Imagem</Label>
             <Input
               id="image"
+              type="file"
+              accept="image/*"
               {...register('image')}
-              placeholder="https://exemplo.com/imagem.jpg"
             />
             {errors.image && (
               <p className="text-sm text-red-500">{errors.image.message}</p>

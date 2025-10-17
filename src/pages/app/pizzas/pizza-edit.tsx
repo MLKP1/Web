@@ -37,7 +37,7 @@ const editPizzaFormSchema = z.object({
   type: z.enum(['SALTY', 'SWEET']),
   active: z.enum(['activated', 'disabled']),
   slug: z.string().min(3, { message: 'O slug deve ter pelo menos 3 caracteres' }).optional(),
-  imageUrl: z.string().url({ message: 'Informe uma URL válida' }).optional().or(z.literal('')),
+  image: z.instanceof(FileList, { message: 'Deve haver uma imagem' }),
 })
 
 type EditPizzaFormData = z.infer<typeof editPizzaFormSchema>
@@ -80,20 +80,21 @@ export function PizzaEdit({ open, onOpenChange, onPizzaUpdated, pizza }: PizzaEd
       type: 'SALTY',
       active: 'activated',
       slug: '',
-      imageUrl: '',
+      image: undefined,
     },
   })
 
   useEffect(() => {
     if (open && pizza) {
+      const price = (pizza.price / 100).toFixed(2).toString()
+
       setValue('name', pizza.name)
       setValue('description', pizza.description)
-      setValue('price', pizza.price.toString())
+      setValue('price', price)
       setValue('size', pizza.size)
       setValue('type', pizza.type)
       setValue('active', pizza.active ? 'activated' : 'disabled')
       setValue('slug', pizza.slug)
-      setValue('imageUrl', pizza.image || '')
     }
   }, [open, pizza, setValue])
 
@@ -105,7 +106,7 @@ export function PizzaEdit({ open, onOpenChange, onPizzaUpdated, pizza }: PizzaEd
         name: data.name,
         description: data.description,
         price: parseFloat(data.price) * 100,
-        image: data.imageUrl || '',
+        image: data.image,
         size: data.size,
         type: data.type,
         slug: data.slug || data.name.toLowerCase().replace(/ /g, '-'),
@@ -113,21 +114,20 @@ export function PizzaEdit({ open, onOpenChange, onPizzaUpdated, pizza }: PizzaEd
       })
 
       const updatedPizza: Pizza = {
-      pizzaId: pizza.pizzaId,
-      name: data.name,
-      description: data.description,
-      price: parseFloat(data.price) * 100,
-      image: data.imageUrl || '',
-      size: data.size,
-      type: data.type,
-      slug: data.slug || data.name.toLowerCase().replace(/ /g, '-'),
-      active: data.active === 'activated',
-    }
+        pizzaId: pizza.pizzaId,
+        name: data.name,
+        description: data.description,
+        price: parseFloat(data.price) * 100,
+        image: pizza.image,
+        size: data.size,
+        type: data.type,
+        slug: data.slug || data.name.toLowerCase().replace(/ /g, '-'),
+        active: data.active === 'activated',
+      }
 
     return updatedPizza
     },
     onSuccess: (updatedPizza) => {
-      toast.success('Pizza atualizada com sucesso!')
       onOpenChange(false)
 
       if (onPizzaUpdated) {
@@ -278,14 +278,15 @@ export function PizzaEdit({ open, onOpenChange, onPizzaUpdated, pizza }: PizzaEd
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="imageUrl">URL da Imagem (opcional)</Label>
-            <Input 
-              id="imageUrl"
-              {...register('imageUrl')}
-              placeholder="https://exemplo.com/imagem.jpg"
+            <Label htmlFor="image">Imagem</Label>
+            <Input
+              id="image"
+              type="file"
+              accept="image/*"
+              {...register('image')}
             />
-            {errors.imageUrl && (
-              <p className="text-sm text-red-500">{errors.imageUrl.message}</p>
+            {errors.image && (
+              <p className="text-sm text-red-500">{errors.image.message}</p>
             )}
           </div>
 

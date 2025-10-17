@@ -8,7 +8,7 @@ export interface EditPizzaParams {
   price: number
   type: 'SALTY' | 'SWEET'
   size: 'MEDIUM' | 'LARGE' | 'FAMILY'
-  image?: string
+  image: FileList
 }
 
 export async function editPizza(
@@ -24,14 +24,18 @@ export async function editPizza(
     image
   }: EditPizzaParams
 ) {
-  await api.put(`/products/pizza/${id}`, {
-    name,
-    description,
-    active,
-    slug,
-    price,
-    type,
-    size,
-    image
-  })
+  const formData = new FormData()
+  formData.append('name', name)
+  formData.append('description', description)
+  formData.append('active', active.toString())
+  formData.append('slug', slug)
+  formData.append('price', price.toString())
+  formData.append('type', type)
+  formData.append('size', size)
+
+  if (image instanceof FileList && image.length > 0) {
+    formData.append('image', image[0])
+  }
+
+  await api.patch(`/products/pizza/${id}`, formData)
 }

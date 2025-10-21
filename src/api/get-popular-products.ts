@@ -8,9 +8,6 @@ export type GetPopularProductsResponse = Array<{
 export async function getPopularProducts() {
   const response = await api.get<GetPopularProductsResponse>(
     '/metrics/popular-products',
-    {
-      withCredentials: true,
-    }
   )
 
   return response.data

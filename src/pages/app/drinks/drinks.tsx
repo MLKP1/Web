@@ -13,10 +13,11 @@ import {
   TableRow
 } from '@/components/ui/table'
 
+import { DrinkTableFilters } from './drink-table-filters'
+import { DrinksTableSkeleton } from './drinks-table-skeleton'
 import { DrinkTableRow } from './drinks-table-row'
 
 import { getDrinks } from '@/api/get-drinks'
-import { DrinksTableSkeleton } from './drinks-table-skeleton'
 
 export function Drinks() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -35,7 +36,7 @@ export function Drinks() {
     isFetching: isFetchingDrinks,
     isLoading: isLoadingDrinks,
   } = useQuery({
-    queryKey: ['drinks'],
+    queryKey: ['drinks', pageIndex, drinkId, active, name, description],
     queryFn: () =>
       getDrinks({
         pageIndex,
@@ -68,7 +69,7 @@ export function Drinks() {
         </div>
 
         <div className="space-y-2.5">
-            {/* <DrinkTableFilters /> */}
+            <DrinkTableFilters />
             <div className="rounded-md border">
               <Table>
                 <TableHeader>

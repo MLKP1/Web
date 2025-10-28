@@ -6,6 +6,7 @@ import { NotFound } from './pages/404'
 import { Dashboard } from './pages/app/dashboard'
 import { Orders } from './pages/app/orders/orders'
 import { Pizzas } from './pages/app/pizzas/pizzas'
+import { Drinks } from './pages/app/drinks/drinks'
 import { SignIn } from './pages/auth/sign-in'
 import { SignUp } from './pages/auth/sign-up'
 import { ErrorBoundary } from './components/error-boundary'
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
       {
         path: '/pizzas',
         element: <Pizzas />
+      },
+      {
+        path: '/drinks',
+        element: <Drinks />
       },
     ],
   },

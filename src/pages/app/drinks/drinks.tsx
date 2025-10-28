@@ -16,6 +16,7 @@ import {
 import { DrinkTableRow } from './drinks-table-row'
 
 import { getDrinks } from '@/api/get-drinks'
+import { DrinksTableSkeleton } from './drinks-table-skeleton'
 
 export function Drinks() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -86,7 +87,7 @@ export function Drinks() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {/* {isLoadingDrinks && !result && <DrinksTableSkeleton />} */}
+                  {isLoadingDrinks && !result && <DrinksTableSkeleton />}
 
                   {result &&
                     result.drinks.map(drink => {

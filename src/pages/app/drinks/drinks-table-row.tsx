@@ -1,6 +1,11 @@
-import { Pencil, Search, Trash } from 'lucide-react'
+import { useMutation } from '@tanstack/react-query'
+import { queryClient } from '@/lib/react-query'
+import { ArrowRight, Loader2, Pencil, Search, Trash } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
+import { removeDrink } from '@/api/remove-drink'
+import { GetDrinksResponse } from '@/api/get-drinks'
 import { ProductStatus } from '@/components/status'
 import { DrinkType } from '@/components/drink-type'
 import { Button } from '@/components/ui/button'
@@ -25,6 +30,33 @@ export interface DrinkTableRowProps {
 
 export function DrinkTableRow({ drink }: DrinkTableRowProps) {
   const [isDrinkDetailsOpen, setIsDrinkDetailsOpen] = useState(false)
+
+  function removeDrinkOnCache(drinkId: string) {
+    const drinksListingCache = queryClient.getQueriesData<GetDrinksResponse>({
+      queryKey: ['drinks'],
+    })
+
+    drinksListingCache.forEach(([cacheKey, cached]) => {
+      if (!cached) {
+        return
+      }
+
+      queryClient.setQueryData<GetDrinksResponse>(cacheKey, {
+        ...cached,
+        drinks: cached.drinks.filter((drink) => drink.drinkId !== drinkId)
+      })
+    })
+
+    toast.success('Bebida removida com sucesso!')
+  }
+
+  const { mutateAsync: removeDrinkFn, isPending: isRemovingDrink } =
+    useMutation({
+      mutationFn: removeDrink,
+      onSuccess: async (_, { drinkId }) => {
+        removeDrinkOnCache(drinkId)
+      }
+    })
 
   return (
     <TableRow>
@@ -130,14 +162,14 @@ export function DrinkTableRow({ drink }: DrinkTableRowProps) {
 
       <TableCell>
         <Button
-          // onDoubleClick={() => removeDrinkFn({ drinkId: drink.drinkId })}
-          disabled={true}
+          onDoubleClick={() => removeDrinkFn({ drinkId: drink.drinkId })}
+          disabled={isRemovingDrink}
           variant="outline"
           size="xs"
         >
-          {/* {isRemovingDrink && (
+          {isRemovingDrink && (
             <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-          )} */}
+          )}
           <Trash className="h-3 w-3" />
           <span className="sr-only">Deletar bebida</span>
         </Button>

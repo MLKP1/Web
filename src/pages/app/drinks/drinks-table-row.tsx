@@ -4,6 +4,8 @@ import { ArrowRight, Loader2, Pencil, Search, Trash } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { activeDrink } from '@/api/active-drink'
+import { disableDrink } from '@/api/disable-drink'
 import { removeDrink } from '@/api/remove-drink'
 import { GetDrinksResponse } from '@/api/get-drinks'
 import { ProductStatus } from '@/components/status'
@@ -57,6 +59,56 @@ export function DrinkTableRow({ drink }: DrinkTableRowProps) {
 
     toast.success('Bebida editada com sucesso!')
   }
+
+  function updateDrinkActiveOnCache(drinkId: string, active: boolean) {
+    const drinksListingCache = queryClient.getQueriesData<GetDrinksResponse>({
+      queryKey: ['drinks'],
+    })
+
+    drinksListingCache.forEach(([cacheKey, cached]) => {
+      if (!cached) {
+        return
+      }
+
+      queryClient.setQueryData<GetDrinksResponse>(cacheKey, {
+        ...cached,
+        drinks: cached.drinks.map((drink) => {
+          if (drink.drinkId !== drinkId) {
+            return drink
+          }
+
+          return {
+            ...drink,
+            active,
+          }
+        }),
+      })
+    })
+
+    toast.success('Status da bebida alterado com sucesso!')
+  }
+
+  const { mutateAsync: activateDrinkFn, isPending: isActivatingDrink } =
+    useMutation({
+      mutationFn: activeDrink,
+      onSuccess: async (_, { drinkId }) => {
+        updateDrinkActiveOnCache(drinkId, true)
+      },
+      onError: () => {
+        toast.error('Erro ao ativar a bebida. Tente novamente.')
+      }
+    })
+
+  const { mutateAsync: disableDrinkFn, isPending: isDisablingDrink } =
+    useMutation({
+      mutationFn: disableDrink,
+      onSuccess: async (_, { drinkId }) => {
+        updateDrinkActiveOnCache(drinkId, false)
+      },
+      onError: () => {
+        toast.error('Erro ao desativar a bebida. Tente novamente.')
+      }
+    })
 
   function removeDrinkOnCache(drinkId: string) {
     const drinksListingCache = queryClient.getQueriesData<GetDrinksResponse>({
@@ -137,29 +189,29 @@ export function DrinkTableRow({ drink }: DrinkTableRowProps) {
           <Button
             variant="outline"
             size="xs"
-            disabled={true}
-            // onClick={() => activateDrinkFn({ drinkId: drink.drinkId })}
+            disabled={isActivatingDrink}
+            onClick={() => activateDrinkFn({ drinkId: drink.drinkId })}
           >
             Ativar
-            {/* {isActivatingDrink ? ( */}
-              {/* // <Loader2 className="ml-2 h-3 w-3 animate-spin" /> */}
-            {/* ) : ( */}
+            {isActivatingDrink ? (
+              <Loader2 className="ml-2 h-3 w-3 animate-spin" />
+            ) : (
               <ArrowRight className="ml-2 h-3 w-3" />
-            {/* )} */}
+            )}
           </Button>
         ) : (
           <Button
             variant="outline"
             size="xs"
-            disabled={true}
-            // onClick={() => disableDrinkFn({ drinkId: drink.drinkId })}
+            disabled={isDisablingDrink}
+            onClick={() => disableDrinkFn({ drinkId: drink.drinkId })}
           >
             Desativar
-            {/* {isDisablingDrink ? ( */}
-              {/* <Loader2 className="ml-2 h-3 w-3 animate-spin" /> */}
-            {/* ) : ( */}
+            {isDisablingDrink ? (
+              <Loader2 className="ml-2 h-3 w-3 animate-spin" />
+            ) : (
               <ArrowRight className="ml-2 h-3 w-3" />
-            {/* )} */}
+            )}
           </Button>
         )
       }

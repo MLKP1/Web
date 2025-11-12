@@ -86,7 +86,7 @@ export function DrinkEdit({ open, onOpenChange, onDrinkUpdated, drink }: DrinkEd
     if (open && drink) {
       setValue('name', drink.name)
       setValue('description', drink.description)
-      setValue('price', drink.price)
+      setValue('price', drink.price / 100)
       setValue('volume', drink.volume)
       setValue('type', drink.type)
       setValue('active', drink.active ? 'activated' : 'disabled')

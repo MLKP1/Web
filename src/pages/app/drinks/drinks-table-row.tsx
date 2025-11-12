@@ -13,6 +13,7 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { TableCell, TableRow } from '@/components/ui/table'
 
 import { DrinkDetails } from './drink-details'
+import { DrinkEdit } from './drink-edit'
 
 export interface DrinkTableRowProps {
   drink: {
@@ -30,6 +31,32 @@ export interface DrinkTableRowProps {
 
 export function DrinkTableRow({ drink }: DrinkTableRowProps) {
   const [isDrinkDetailsOpen, setIsDrinkDetailsOpen] = useState(false)
+  const [isDrinkEditOpen, setIsDrinkEditOpen] = useState(false)
+
+  function editDrinkOnCache(updatedDrink: DrinkTableRowProps['drink']) {
+    const drinksListingCache = queryClient.getQueriesData<GetDrinksResponse>({
+      queryKey: ['drinks'],
+    })
+
+    drinksListingCache.forEach(([cacheKey, cached]) => {
+      if (!cached) {
+        return
+      }
+
+      queryClient.setQueryData<GetDrinksResponse>(cacheKey, {
+        ...cached,
+        drinks: cached.drinks.map((drink) => {
+          if (drink.drinkId !== updatedDrink.drinkId) {
+            return drink
+          }
+
+          return updatedDrink
+        })
+      })
+    })
+
+    toast.success('Bebida editada com sucesso!')
+  }
 
   function removeDrinkOnCache(drinkId: string) {
     const drinksListingCache = queryClient.getQueriesData<GetDrinksResponse>({
@@ -114,11 +141,11 @@ export function DrinkTableRow({ drink }: DrinkTableRowProps) {
             // onClick={() => activateDrinkFn({ drinkId: drink.drinkId })}
           >
             Ativar
-            {/* {isActivatingDrink ? (
-              <Loader2 className="ml-2 h-3 w-3 animate-spin" />
-            ) : (
+            {/* {isActivatingDrink ? ( */}
+              {/* // <Loader2 className="ml-2 h-3 w-3 animate-spin" /> */}
+            {/* ) : ( */}
               <ArrowRight className="ml-2 h-3 w-3" />
-            )} */}
+            {/* )} */}
           </Button>
         ) : (
           <Button
@@ -128,35 +155,34 @@ export function DrinkTableRow({ drink }: DrinkTableRowProps) {
             // onClick={() => disableDrinkFn({ drinkId: drink.drinkId })}
           >
             Desativar
-            {/* {isDisablingDrink ? (
-              <Loader2 className="ml-2 h-3 w-3 animate-spin" />
-            ) : (
+            {/* {isDisablingDrink ? ( */}
+              {/* <Loader2 className="ml-2 h-3 w-3 animate-spin" /> */}
+            {/* ) : ( */}
               <ArrowRight className="ml-2 h-3 w-3" />
-            )} */}
+            {/* )} */}
           </Button>
         )
       }
       </TableCell>
 
       <TableCell>
-        <Dialog>
+        <Dialog onOpenChange={setIsDrinkEditOpen} open={isDrinkEditOpen}>
           <DialogTrigger asChild>
             <Button
               variant="outline"
               size="xs"
-              disabled={true}
             >
               <Pencil className="h-3 w-3" />
               <span className="sr-only">Editar bebida</span>
             </Button>
           </DialogTrigger>
 
-          {/* <DrinkEdit
+          <DrinkEdit
             onOpenChange={setIsDrinkEditOpen}
             open={isDrinkEditOpen}
             drink={drink}
             onDrinkUpdated={(updatedDrink) => editDrinkOnCache(updatedDrink)}
-          /> */}
+          />
         </Dialog>
       </TableCell>
 

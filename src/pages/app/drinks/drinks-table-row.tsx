@@ -94,9 +94,6 @@ export function DrinkTableRow({ drink }: DrinkTableRowProps) {
       onSuccess: async (_, { drinkId }) => {
         updateDrinkActiveOnCache(drinkId, true)
       },
-      onError: () => {
-        toast.error('Erro ao ativar a bebida. Tente novamente.')
-      }
     })
 
   const { mutateAsync: disableDrinkFn, isPending: isDisablingDrink } =
@@ -105,9 +102,6 @@ export function DrinkTableRow({ drink }: DrinkTableRowProps) {
       onSuccess: async (_, { drinkId }) => {
         updateDrinkActiveOnCache(drinkId, false)
       },
-      onError: () => {
-        toast.error('Erro ao desativar a bebida. Tente novamente.')
-      }
     })
 
   function removeDrinkOnCache(drinkId: string) {

@@ -56,7 +56,7 @@ export function SignIn() {
         href="/sign-up"
         className={twMerge(
           buttonVariants({ variant: 'ghost' }),
-          'absolute right-4 top-4 md:right-8 md:top-8',
+          'hidden lg:inline-flex absolute right-8 top-8',
         )}
       >
         Novo estabelecimento
@@ -90,6 +90,15 @@ export function SignIn() {
               <Button type="submit" disabled={isSubmitting}>
                 Acessar painel
               </Button>
+              <a
+                href="/sign-up"
+                className={twMerge(
+                  buttonVariants({ variant: 'secondary' }),
+                  `lg:hidden`
+                )}
+              >
+                Novo estabelecimento
+              </a>
             </div>
           </form>
         </div>

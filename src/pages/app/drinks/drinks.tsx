@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { Loader2Icon } from 'lucide-react'
+import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useSearchParams } from 'react-router-dom'
+import { queryClient } from '@/lib/react-query'
+import { toast } from 'sonner'
 
 import { Pagination } from '@/components/pagination'
 import {
@@ -12,14 +15,18 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
+import { Dialog, DialogTrigger } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 import { DrinkTableFilters } from './drink-table-filters'
 import { DrinksTableSkeleton } from './drinks-table-skeleton'
 import { DrinkTableRow } from './drinks-table-row'
+import { DrinkRegister } from './drink-register'
 
-import { getDrinks } from '@/api/get-drinks'
+import { getDrinks, GetDrinksResponse } from '@/api/get-drinks'
 
 export function Drinks() {
+  const [isDrinkRegisterOpen, setIsDrinkRegisterOpen] = useState(false)
   const [searchParams, setSearchParams] = useSearchParams()
 
   const drinkId = searchParams.get('drinkId')
@@ -55,6 +62,25 @@ export function Drinks() {
     })
   }
 
+  function registerDrinkOnCache(newDrink: any) {
+    const drinksListingCache = queryClient.getQueriesData<GetDrinksResponse>({
+      queryKey: ['drinks'],
+    })
+
+    drinksListingCache.forEach(([cacheKey, cached]) => {
+      if (!cached) {
+        return
+      }
+
+      queryClient.setQueryData<GetDrinksResponse>(cacheKey, {
+        ...cached,
+        drinks: [newDrink, ...cached.drinks],
+      })
+
+      toast.success('Bebida cadastrada com sucesso!')
+    })
+  }
+
   return (
     <>
       <Helmet title="Bebidas" />
@@ -66,6 +92,24 @@ export function Drinks() {
               <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
             )}
           </h1>
+
+          <Dialog onOpenChange={setIsDrinkRegisterOpen} open={isDrinkRegisterOpen}>
+            <DialogTrigger asChild>
+              <Button
+                type="button"
+                variant="secondary"
+                size="default"
+              >
+                Cadastrar
+              </Button>
+            </DialogTrigger>
+
+            <DrinkRegister
+              open={isDrinkRegisterOpen}
+              onOpenChange={setIsDrinkRegisterOpen}
+              onDrinkCreated={(newDrink) => registerDrinkOnCache(newDrink)}
+            />
+          </Dialog>
         </div>
 
         <div className="space-y-2.5">
